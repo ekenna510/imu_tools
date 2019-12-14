@@ -1,0 +1,30 @@
+<launch>
+  <arg name="open_rviz" default="true"/>
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+ 
+   <!-- Turtlebot3 -->
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock /home/robot/catkin_ws/src/imu_tools/imu_filter_madgwick/sample/phidgets_imu_upside_down.bag"/>
+  
+  #### IMU Orientation Filter ###############################################
+
+  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_node" args="imu/data_raw:=imu"
+    output="screen">
+    <!--remap from="/imu" to="/imu/data_raw" /-->
+    <param name="use_mag" value="false"/>
+    <param name="use_magnetic_field_msg" value="false"/>
+    <param name="world_frame" value="enu" />
+    <param name="imu_topic" value="imu" />
+    <!--param name="magnetic_topic" value="magnetic_field" /-->
+
+  </node>
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
+  </group>
+
+  
+</launch>
